@@ -11,11 +11,15 @@ import client.model.session.PlayerStepInfo;
 import client.model.session.Session;
 
 import java.util.Scanner;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 
 //проблемы с ChessSet , как без дублирования использовать разные классы
 //проблем не обнаружено
-//проверка на мат не тестировалась
+//проверка на мат не тестировалась(1 тест)
+//добавить список срубленных фигур(сейчас происходит потеря ссылки)
+
 
 
 
@@ -64,9 +68,13 @@ public class ClientApp {
             int x = convertLetter(xs), nx = convertLetter(nxs);
 
 
+
+
             if(order % 2 == 0){
                 session.setLocalPlayerStepInfo(new PlayerStepInfo(new Point(x,y) ,new Point(nx , ny)));
             }else{
+
+
                 session.setDistantPlayerStepInfo(new PlayerStepInfo(new Point(x,y) , new Point(nx,ny)));
             }
             LogicManagerConclusion conslusion =  session.execNextStep();
