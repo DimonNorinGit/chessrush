@@ -98,7 +98,7 @@ public class ClassicChessSet extends ChessSet {
                 Piece p = null;
                 try {
                     p = (Piece) pieceClass.getConstructor().newInstance();//(Piece)cl.getConstructor().newInstance();
-                }catch (Exception ex){
+                }catch (Exception  exc){
                     return;
                 }
                 p.setBoardSide(side);

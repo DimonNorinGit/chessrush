@@ -2,7 +2,7 @@ package client.model.piece;
 
 import client.model.board.BoardSquare;
 import client.model.board.ChessBoard;
-import client.model.Point;
+import client.Point;
 
 import java.util.Set;
 

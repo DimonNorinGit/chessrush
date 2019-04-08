@@ -1,5 +1,6 @@
 package client.model.session;
 
+import client.Connector;
 import client.model.board.ChessBoard;
 import client.model.logic.LogicManager;
 import client.model.logic.LogicManagerConclusion;
@@ -18,6 +19,10 @@ public class Session {
         logicManager = new LogicManager(ChessColor.WHITE);
         localPlayer.arrangePiecesOnBoard(chessBoard);
         distantPlayer.arrangePiecesOnBoard(chessBoard);
+    }
+
+    public LogicManager getLogicManager(){
+        return logicManager;
     }
 
     public Player getDistantPlayer() {
@@ -52,7 +57,6 @@ public class Session {
     //if step unsuitable error info will set into LogicManagerConclusion
     //ret true if step is successful otherwise ret false
     public LogicManagerConclusion execNextStep(){
-
         return logicManager.run(this);
     }
 

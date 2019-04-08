@@ -1,7 +1,7 @@
 package client.model.logic;
 
 
-import client.model.*;
+import client.Point;
 import client.model.board.BoardSquare;
 import client.model.board.ChessBoard;
 import client.model.piece.*;
@@ -35,6 +35,13 @@ public class LogicManager {
     //return true if next step is valid
     //если ход неверный , а пришел он от удаленного игрока ->
     //читерит или ошибка сервера и т д
+
+
+    public boolean isCorrectStartSquare(Session session , Point chosenPoint){
+        int x = chosenPoint.getX() , y = chosenPoint.getY();
+        BoardSquare square = session.getChessBoard().getBoardSquare(x , y);
+        return square.hasPiece() && square.getPiece().getColor() == currentChessColor;
+    }
 
     public LogicManagerConclusion run(Session session){
         Player local = session.getLocalPlayer();

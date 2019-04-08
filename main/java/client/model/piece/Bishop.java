@@ -1,6 +1,6 @@
 package client.model.piece;
 
-import client.model.Point;
+import client.Point;
 import client.model.board.ChessBoard;
 import client.model.board.BoardSquare;
 

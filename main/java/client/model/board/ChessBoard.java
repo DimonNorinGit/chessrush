@@ -1,7 +1,8 @@
 package client.model.board;
 
 
-import client.model.Point;
+import client.Connector;
+import client.Point;
 import client.model.piece.Piece;
 
 
@@ -10,13 +11,13 @@ public class ChessBoard {
 
     public static final int X_SIZE = 8;
     public static final int Y_SIZE = 8;
-
     private  BoardSquare[][] board;
 
 
-    public ChessBoard(){
+
+    public ChessBoard(Connector connector){
         board = new BoardSquare[Y_SIZE][X_SIZE];
-        init();
+        init(connector);
     }
 
 
@@ -95,7 +96,7 @@ public class ChessBoard {
         }
     }
 
-    private void init(){
+    private void init(Connector connector){
         for(int i = 0; i < X_SIZE; ++i){
             for(int j = 0; j < Y_SIZE; ++j){
                 if((i + j)% 2 == 0){
@@ -103,6 +104,7 @@ public class ChessBoard {
                 }else{
                     board[i][j] = new BoardSquare(SquareColor.BLACK , new Point(j , i));
                 }
+                connector.registerConnection("SQUARE" + i + j ,   board[i][j].getConnect());
             }
         }
     }

@@ -12,22 +12,32 @@ public class GameScene extends ClientPanel {
     public GameScene(Window root){
         setBackground(Color.BLUE);
 
-        addComponentWithName("LEFT_BAR" , new LeftBar());
-        addComponentWithName("RIGHT_BAR" , new RightBar());
-        addComponentWithName("TOP_BAR" , new TopBar());
-        addComponentWithName("SIDE_BAR" , new SideBar());
-        addComponentWithName("BOARD" , new Board());
+        addPanelWithName("LEFT_BAR" , new LeftBar());
+        addPanelWithName("RIGHT_BAR" , new RightBar());
+        addPanelWithName("TOP_BAR" , new TopBar());
+        addPanelWithName("SIDE_BAR" , new SideBar());
+        addPanelWithName("BOARD" , new Board(root));
 
 
         gorizontalPanel.setLayout(new BoxLayout(gorizontalPanel , BoxLayout.X_AXIS));
-        gorizontalPanel.add(getComponentByName("LEFT_BAR"));
-        gorizontalPanel.add(getComponentByName("BOARD"));
-        gorizontalPanel.add(getComponentByName("RIGHT_BAR"));
+        gorizontalPanel.add(getPanelByName("LEFT_BAR"));
+        gorizontalPanel.add(getPanelByName("BOARD"));
+        gorizontalPanel.add(getPanelByName("RIGHT_BAR"));
+
 
         setLayout(new BoxLayout(this , BoxLayout.Y_AXIS));
-        add(getComponentByName("TOP_BAR"));
+        add(getPanelByName("TOP_BAR"));
         add(gorizontalPanel);
-        add(getComponentByName("SIDE_BAR"));
+        add(getPanelByName("SIDE_BAR"));
+    }
+
+
+    @Override
+    public void updateSize(){
+        setPreferredSize(new Dimension(SizeConfig.WINDOW_X , SizeConfig.WINDOW_Y));
+        for(String name : getChildrenNames()){
+            getPanelByName(name).updateSize();
+        }
     }
 
 }

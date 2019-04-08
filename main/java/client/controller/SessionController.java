@@ -1,5 +1,7 @@
 package client.controller;
 
+import client.Connect;
+import client.Connector;
 import client.model.PlayerInfo;
 import client.model.board.ChessBoard;
 import client.model.piece.ChessColor;
@@ -13,7 +15,7 @@ public class SessionController {
     private boolean initialized = false;
     private Session session = null;
 
-    public void initialize(PlayerInfo localInfo  , PlayerInfo distantInfo){
+    public void initialize(PlayerInfo localInfo  , PlayerInfo distantInfo , Connector connector){
         if(initialized)return;
 
         ChessSet localChessSet = new ClassicChessSet(localInfo.getName() ,
@@ -28,7 +30,7 @@ public class SessionController {
                 distantInfo.getSide());
         Player distant = new Player(distantInfo.getName() , distantChessSet.getColor() , distantChessSet);
 
-        ChessBoard board = new ChessBoard();
+        ChessBoard board = new ChessBoard(connector);
 
         session = new Session(local , distant , board);
 
@@ -36,9 +38,14 @@ public class SessionController {
     }
 
 
-    public void reinitialize(PlayerInfo localInfo  ,PlayerInfo distantInfo){
+    public void reinitialize(PlayerInfo localInfo  , PlayerInfo distantInfo , Connector connector){
         initialized = false;
-        initialize(localInfo , distantInfo);
+        initialize(localInfo , distantInfo , connector);
+    }
+
+
+    public Session getSession(){
+        return session;
     }
 
 

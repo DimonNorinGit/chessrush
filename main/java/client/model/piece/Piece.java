@@ -6,7 +6,7 @@ import java.util.HashSet;
 import client.model.board.BoardSide;
 import client.model.board.BoardSquare;
 import client.model.board.ChessBoard;
-import client.model.Point;
+import client.Point;
 
 
 

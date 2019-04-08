@@ -1,6 +1,7 @@
 package client.model.board;
 
-import client.model.Point;
+import client.Connect;
+import client.Point;
 import client.model.piece.Piece;
 
 
@@ -8,6 +9,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class BoardSquare{
+
+    private Connect connect = new Connect();
 
     private SquareColor color;
     private Point coordinates;
@@ -22,6 +25,9 @@ public class BoardSquare{
         hashCode = this.coordinates.getX() * 10 + this.coordinates.getY();
         piece = null;
         underAttack = new HashSet<>();
+
+        connect.setProperty("PIECE" , null);
+        connect.setProperty("PIECE_COLOR" , null);
     }
 
     @Override
@@ -37,11 +43,13 @@ public class BoardSquare{
         return hashCode == ((BoardSquare) square).hashCode;
     }
 
+    public Connect getConnect(){
+        return connect;
+    }
 
     public Point getCoordinates(){
         return coordinates;
     }
-
 
     public void addAttackPiece(Piece piece){
         underAttack.add(piece);
@@ -65,12 +73,16 @@ public class BoardSquare{
     }
 
     public void setPiece(Piece piece){
+        connect.setProperty("PIECE" , piece.getType());
+        connect.setProperty("PIECE_COLOR" , piece.getColor().toString());
         this.piece = piece;
     }
 
     public Piece getPiece(){return piece;}
 
     public Piece removePiece(){
+        connect.setProperty("PIECE" , null);
+        connect.setProperty("PIECE_COLOR" , null);
         Piece p = piece;
         piece = null;
         return p;

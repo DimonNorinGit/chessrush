@@ -1,4 +1,4 @@
-package client.model;
+package client;
 
 public class Point {
     private int x;
@@ -9,9 +9,14 @@ public class Point {
         this.y = y;
     }
 
-    /*public boolean compare(Point p){
+    public boolean compare(Point p){
         return x == p.getX() && y == p.getY();
-    }*/
+    }
+
+    @Override
+    public String toString(){
+        return x + " " + y;
+    }
 
     public int getY() {
         return y;

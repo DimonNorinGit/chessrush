@@ -24,9 +24,11 @@ public class MainMenu extends ClientPanel {
 
         playButton.addActionListener(e -> root.changePanel("GAME_SCENE"));
         exitButton.addActionListener(e ->root.exit());
+    }
 
-
-
+    @Override
+    public void updateSize(){
+        setPreferredSize(new Dimension(SizeConfig.WINDOW_X , SizeConfig.WINDOW_Y));
     }
 
 }

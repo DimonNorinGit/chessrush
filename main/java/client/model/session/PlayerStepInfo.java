@@ -1,6 +1,6 @@
 package client.model.session;
 
-import client.model.Point;
+import client.Point;
 
 public class PlayerStepInfo {
 
