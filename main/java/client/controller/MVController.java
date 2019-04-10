@@ -5,15 +5,20 @@ import client.Connector;
 import client.Point;
 import client.model.PlayerInfo;
 import client.model.board.BoardSide;
+import client.model.board.BoardSquare;
+import client.model.board.ChessBoard;
 import client.model.logic.LogicManager;
 import client.model.logic.LogicManagerConclusion;
-import client.model.piece.ChessColor;
+import client.model.logic.StepCorrectState;
+import client.model.piece.*;
+import client.model.session.Player;
 import client.model.session.PlayerStepInfo;
 import client.model.session.Session;
 import client.view.EventDispatcher;
 import client.view.Window;
 
 import java.awt.peer.LightweightPeer;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Scanner;
 
 public class MVController {
@@ -23,6 +28,7 @@ public class MVController {
     private EventDispatcher dispatcher;
     private SessionController sessionController;
     private Window window;
+    private Piece transformingPiece = null;
     private boolean isFirstClick = false;
     private int currentClickX = -1;
     private int currentClickY = -1;
@@ -35,9 +41,25 @@ public class MVController {
         PlayerInfo distant = new PlayerInfo("Bob" , ChessColor.BLACK , BoardSide.TOP);
         sessionController.initialize(local , distant , connector);
 
-        Connect connect = new Connect();
-        connect.setProperty("IS_FLIPPED" , false);
-        connector.registerConnection("FLIP_BOARD" , connect);
+        Connect gameOverConnect = new Connect();
+        gameOverConnect.setProperty("GAME_OVER" , false);
+        gameOverConnect.setProperty("WINNER" , null);
+        connector.registerConnection("WINDOW" , gameOverConnect);
+
+
+        Connect chessColorConnect = new Connect();
+        chessColorConnect.setProperty("CURRENT_COLOR" , "WHITE");
+        connector.registerConnection("GAME_SCENE" , chessColorConnect);
+
+        Connect electorConnect = new Connect();
+        electorConnect.setProperty("IS_VISIBLE" , false);
+        connector.registerConnection("ELECTOR" , electorConnect);
+
+        Connect flipConnect = new Connect();
+        flipConnect.setProperty("IS_FLIPPED" , false);
+        connector.registerConnection("FLIP_BOARD" , flipConnect);
+
+
         window = new Window(this);
         dispatcher = window.getEventDispatcher();
     }
@@ -70,24 +92,41 @@ public class MVController {
     }*/
 
 
+    public void transformPiece(String pieceName){
+        if(transformingPiece == null) return;
+        Session session = sessionController.getSession();
+        Player player = null;
+        if(session.getLocalPlayer().getChessSet().getColor() == transformingPiece.getColor()){
+            player = session.getLocalPlayer();
+        }else{
+            player = session.getDistantPlayer();
+        }
+
+        player.getChessSet().removePiece(pieceName ,  transformingPiece);
+        Piece newPiece = player.getChessSet().createNewPiece(pieceName);
+        Point pos = transformingPiece.getPosition();
+        session.getChessBoard().setPiece(pos.getX() , pos.getY() , newPiece);
+        transformingPiece = null;
+    }
+
 
     public void addNewClick(int x , int y){
+        //обработка нажатия
         connector.getConnect("FLIP_BOARD").setProperty("IS_FLIPPED" , false);
+        connector.getConnect("ELECTOR").setProperty("IS_VISIBLE" , false);
+
         Session session = sessionController.getSession();
         LogicManager logicManager = session.getLogicManager();
 
         if(!isFirstClick && !logicManager.isCorrectStartSquare(session , new Point(x , y))){
             return;
         }
-
         if(!isFirstClick) {
             currentClickX = x;
             currentClickY = y;
             isFirstClick = true;
             return;
         }
-
-        System.out.println("WHAT");
 
         Point startPoint = new Point(currentClickX ,currentClickY);
         Point endPoint  = new Point(x , y);
@@ -102,10 +141,24 @@ public class MVController {
         LogicManagerConclusion conslusion =  session.execNextStep();
 
         if(conslusion.isSucceed()){
-            System.out.println(conslusion.getCorrectState());
+            StepCorrectState state  = conslusion.getCorrectState();
+            System.out.println(state);
+            if(state == StepCorrectState.CHECK_MATE){
+                connector.getConnect("WINDOW").setProperty("GAME_OVER" , true);
+            }else if(state == StepCorrectState.TRANSFORMATION){
+                connector.getConnect("ELECTOR").setProperty("IS_VISIBLE" , true);
+                transformingPiece = session.getChessBoard().
+                        getBoardSquare(endPoint.getX() , endPoint.getY()).getPiece();
+            }
+            if(logicManager.getCurrentChessColor() == ChessColor.WHITE){
+                connector.getConnect("GAME_SCENE").setProperty("CURRENT_COLOR" , "WHITE");
+            }else{
+                connector.getConnect("GAME_SCENE").setProperty("CURRENT_COLOR" , "BLACk");
+            }
             ++order;
             connector.getConnect("FLIP_BOARD").setProperty("IS_FLIPPED" , true);
             isFirstClick = false;
+            connector.updateConnections();
         }else{
             System.out.println(conslusion.getWrongState());
             System.out.println("Wrong MOve");
@@ -121,63 +174,5 @@ public class MVController {
     public void run(){
         window.setVisible(true);
         connector.updateConnections();
-
-
-        /*int order = 0;
-        Session session = sessionController.getSession();
-        LogicManager logicManager = session.getLogicManager();
-
-        while(true){
-            Point startPoint = null , endPoint = null;
-            while (true) {
-                synchronized (dispatcher) {
-                    if (dispatcher.isReady()) {
-                        startPoint = dispatcher.getStartPoint();
-                        endPoint = dispatcher.getEndPoint();
-                        if(!logicManager.isCorrectStartSquare(session , startPoint)){
-                            dispatcher.restart();
-                            System.out.println("Not my piece");
-                            continue;
-                        }
-                        if(startPoint.compare(endPoint)){
-                            dispatcher.backupEndPoint();
-                            continue;
-                        }
-
-                        System.out.println(startPoint);
-                        System.out.println(endPoint);
-                        break;
-                    }
-                }
-            }
-
-            if(order % 2 == 0){
-                session.setLocalPlayerStepInfo(new PlayerStepInfo(startPoint,
-                        endPoint));
-                //dispatcher.restart();
-            }else{
-                session.setDistantPlayerStepInfo(new PlayerStepInfo(startPoint , endPoint));
-            }
-            LogicManagerConclusion conslusion =  session.execNextStep();
-
-            if(conslusion.isSucceed()){
-                System.out.println(conslusion.getCorrectState());
-                ++order;
-                connector.getConnect("FLIP_BOARD").setProperty("IS_FLIPPED" , true);
-                connector.updateConnections();
-            }else{
-                System.out.println(conslusion.getWrongState());
-                System.out.println("Wrong MOve");
-            }
-            dispatcher.restart();
-        }*/
-
-
     }
-
-
-
-
-
-
 }

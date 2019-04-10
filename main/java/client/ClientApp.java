@@ -2,7 +2,9 @@ package client;
 
 import client.controller.MVController;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -21,18 +23,15 @@ import java.util.Map;
 // PIECE_COLOR4
 
 //Неправильная рокировка
-//изменить способ передачи сообщения о ходе
-//передача logicManager вьюшке
-//Проверка мата , исключения...
-
-
+//Проверка мата , исключения...//не факт(пофикшено)
+//проверка при мате неправильна
+//ужасно реализовано добавление новой фигуры , внедрить на уровне модели
 public class ClientApp {
 
-    public static void main(String[] args) {
+    static Object o;
 
+    public static void main(String[] args) {
         MVController m = new MVController();
         m.run();
-        //Map<String , Integer> m = new HashMap<>();
     }
-
 }

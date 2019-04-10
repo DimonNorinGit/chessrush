@@ -1,16 +1,20 @@
 package client.view;
 
+import client.Connect;
+
 import javax.swing.*;
 import java.awt.*;
 
 public class GameScene extends ClientPanel {
     //сделать отдельными классами
     private JPanel verticalPanel = new JPanel();
-    private JPanel gorizontalPanel = new JPanel();
-
+    private JPanel horizontalPanel = new JPanel();
+    private PieceElector elector;
 
     public GameScene(Window root){
         setBackground(Color.BLUE);
+
+        elector = new PieceElector(root.getController() , root);
 
         addPanelWithName("LEFT_BAR" , new LeftBar());
         addPanelWithName("RIGHT_BAR" , new RightBar());
@@ -19,16 +23,29 @@ public class GameScene extends ClientPanel {
         addPanelWithName("BOARD" , new Board(root));
 
 
-        gorizontalPanel.setLayout(new BoxLayout(gorizontalPanel , BoxLayout.X_AXIS));
-        gorizontalPanel.add(getPanelByName("LEFT_BAR"));
-        gorizontalPanel.add(getPanelByName("BOARD"));
-        gorizontalPanel.add(getPanelByName("RIGHT_BAR"));
+        horizontalPanel.setLayout(new BoxLayout(horizontalPanel, BoxLayout.X_AXIS));
+        horizontalPanel.add(getPanelByName("LEFT_BAR"));
+        horizontalPanel.add(getPanelByName("BOARD"));
+        horizontalPanel.add(getPanelByName("RIGHT_BAR"));
 
 
         setLayout(new BoxLayout(this , BoxLayout.Y_AXIS));
         add(getPanelByName("TOP_BAR"));
-        add(gorizontalPanel);
+        add(horizontalPanel);
         add(getPanelByName("SIDE_BAR"));
+        root.getConnector().connectTo("GAME_SCENE", new ColorConsumer());
+    }
+
+    private class ColorConsumer implements Consumer{
+
+        @Override
+        public void update(Connect connect) {
+            String  clr = (String)connect.getProperty("CURRENT_COLOR");
+            JPanel p = getPanelByName("TOP_BAR");
+            if("WHITE".equals(clr)){
+                p.setBackground(ColorsSet.TOP_BAR_WHITE);
+            }else p.setBackground(ColorsSet.TOP_BAR_BLACk);
+        }
     }
 
 

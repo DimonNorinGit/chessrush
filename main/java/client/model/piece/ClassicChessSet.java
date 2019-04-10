@@ -1,5 +1,6 @@
 package client.model.piece;
 
+import client.Point;
 import client.model.board.BoardSide;
 import client.model.board.ChessBoard;
 
@@ -72,6 +73,35 @@ public class ClassicChessSet extends ChessSet {
                 case "King":piecesCounts.put(name , 1);break;
             }
         }*/
+    }
+
+    @Override
+    public void removePiece(String name, Piece piece) {
+        getPieces().get(name).remove(piece);
+    }
+
+    @Override
+    public Piece createNewPiece(String pieceName) {
+        Class pieceClass = null;
+        switch (pieceName){
+            case "Bishop": pieceClass =  Bishop.class; break;
+            case "King" : pieceClass =  King.class; break;
+            case "Pawn" : pieceClass =  Pawn.class; break;
+            case "Queen" : pieceClass =  Queen.class; break;
+            case "Rook": pieceClass =  Rook.class;break;
+            case "Knight": pieceClass =  Knight.class;break;
+        }
+        Piece newPiece = null;
+        if(pieceClass == null)return null;
+        try {
+            newPiece = (Piece) pieceClass.getConstructor().newInstance();
+        }catch (Exception exc){
+            //df
+        }
+        newPiece.setColor(getColor());
+        newPiece.setOwner(getOwner());
+        getPieces().get(pieceName).add(newPiece);
+        return newPiece;
     }
 
     //should clear

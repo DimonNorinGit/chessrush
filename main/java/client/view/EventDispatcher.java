@@ -14,7 +14,7 @@ public class EventDispatcher{
 
     public void processClick(int x , int y){
         controller.addNewClick(x , y);
-        controller.getConnector().updateConnections();
+        //controller.getConnector().updateConnections();
     }
 
    /*public boolean isReady(){

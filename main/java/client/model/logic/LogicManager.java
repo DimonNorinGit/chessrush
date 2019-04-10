@@ -26,6 +26,9 @@ public class LogicManager {
         currentChessColor = startColor;
     }
 
+    public ChessColor getCurrentChessColor(){
+        return currentChessColor;
+    }
 
     private void changeWalkingColor(){
         if(currentChessColor == ChessColor.WHITE) currentChessColor = ChessColor.BLACK;
@@ -107,12 +110,15 @@ public class LogicManager {
                 conclusion.setWrongState(StepWrongState.IMPOSSIBLE_CASTLING);
                 return conclusion;
             }
+            doCastling(movingPiece , endPiece , board);
 
-            board.removePiece(nx , ny);
+            /*board.removePiece(nx , ny);
 
             board.movePiece(x , y , nx , ny);
 
-            board.setPiece(x , y , endPiece);
+            board.setPiece(x , y , endPiece);*/
+            //странная рокировка
+
             conclusion.setCorrectState(StepCorrectState.CASTLING);
             changeWalkingColor();
             movingPiece.setIsMoved(true);
@@ -136,6 +142,11 @@ public class LogicManager {
 
         //тут точно есть срубленная фигура
         Piece capture = execStep(board , startPoint , endPoint);
+        if(capture != null){
+            capture.kill();
+            opponentPlayer.getChessSet().removePiece(capture.getType() , capture);
+        }
+        //remove from ChessSet?
 
         //проверка на шах самому себе
         if(verifyCheck(board , opponentPlayer.getChessSet() , currentKing)){
@@ -164,6 +175,11 @@ public class LogicManager {
                 conclusion.setCorrectState(StepCorrectState.CHECK);
             }
         }
+        if(movingPiece instanceof Pawn){
+            if(ny == ChessBoard.Y_SIZE - 1 || ny == 0){
+                conclusion.setCorrectState(StepCorrectState.TRANSFORMATION);
+            }
+        }
 
         movingPiece.setIsMoved(true);
         changeWalkingColor();
@@ -178,7 +194,6 @@ public class LogicManager {
         BoardSquare endSquare = board.getBoardSquare(nx , ny);
         if(endSquare.hasPiece()){
             Piece capture = endSquare.removePiece();
-            capture.kill();
             board.movePiece(x , y , nx , ny);
             return capture;
         }
@@ -187,8 +202,26 @@ public class LogicManager {
     }
 
 
+    private void doCastling(Piece a , Piece b , ChessBoard board){
+        Piece rook = a , king = b;
+        if(a instanceof King){
+            rook = b;
+            king = a;
+        }
+        Point rookPos = rook.getPosition();
+        Point kingPos = king.getPosition();
+        int rookNewX = 3 , kingNewX = 2;
+        if(rook.getPosition().getX() == ChessBoard.X_SIZE - 1){
+            rookNewX = ChessBoard.X_SIZE - 3;
+            kingNewX = ChessBoard.X_SIZE - 2;
+        }
+
+        board.movePiece(rookPos.getX() , rookPos.getY() ,rookNewX ,  rookPos.getY());
+        board.movePiece(kingPos.getX() , kingPos.getY() , kingNewX , kingPos.getY());
+    }
 
 
+    //хардкод с проверкой точного местоположения фигур
     private boolean checkCastling(ChessBoard board , ChessSet opponentSet , Piece initialPiece , Piece finalPiece){
         boolean ok = (initialPiece instanceof King && finalPiece instanceof Rook) ||
                 (initialPiece instanceof Rook && finalPiece instanceof King);
@@ -253,9 +286,12 @@ public class LogicManager {
 
 
     private boolean verifyCheckMate(ChessBoard board , ChessSet currentSet , ChessSet opponentSet , Piece king){
+
         boolean solvable = false;
         for(String name : opponentSet.getChessNames()){
             for(Piece movingPiece : opponentSet.getChessListByName(name)){
+                if(!movingPiece.isAlive())continue;
+
                 Set<BoardSquare> attackedSquares = movingPiece.getAttackedSquares(board);
                 if(movingPiece instanceof Pawn){
                     //test!?
@@ -264,26 +300,31 @@ public class LogicManager {
                 }
                 if(attackedSquares.isEmpty())continue;
                 for(BoardSquare square : attackedSquares){
-                    Point keepPos = movingPiece.getPosition();
-                    Piece capture = execStep(board , movingPiece.getPosition() , square.getCoordinates());
-                    //movingPiece меняетя положенение
-                    if(capture != null) capture.kill();
-                    //пересчет атакованных
-                    defineAttackedFields(board , currentSet);
-
-                    if (!verifyCheck(board, currentSet, king)) {
-                        solvable = true;
-                    }
-
-                    execStep(board , movingPiece.getPosition() , keepPos);
-                    Point pos = square.getCoordinates();
-                    if(capture != null){
-                        capture.ret();
-                        board.setPiece(pos.getX() , pos.getY() , capture);
-                    }
-                    if(solvable){
+                    try {
+                        Point squareCoordinates  = square.getCoordinates();
+                        Point keepPos = movingPiece.getPosition();
+                        Piece capture = execStep(board, movingPiece.getPosition(), squareCoordinates);
+                        //movingPiece меняется положенение
+                        if (capture != null) capture.kill();
+                        //пересчет атакованных
                         defineAttackedFields(board, currentSet);
-                        return false;
+
+                        if (!verifyCheck(board, currentSet, king)) {
+                            solvable = true;
+                        }
+
+                        execStep(board, movingPiece.getPosition(), keepPos);
+                        Point pos = square.getCoordinates();
+                        if (capture != null) {
+                            capture.ret();
+                            board.setPiece(squareCoordinates.getX() , squareCoordinates.getY(), capture);
+                        }
+                        if (solvable) {
+                            defineAttackedFields(board, currentSet);
+                            return false;
+                        }
+                    }catch (Exception exc){
+                        System.out.println(exc.getMessage());
                     }
                 }
             }

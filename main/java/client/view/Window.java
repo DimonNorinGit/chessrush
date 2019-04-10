@@ -17,16 +17,33 @@ public class Window extends JFrame {
     private String currentScreenName = null;
     private Connector connector;
     private EventDispatcher eventDispatcher;
+    private MVController controller;
+
+    private class GameOver implements Consumer{
+
+        @Override
+        public void update(Connect connect) {
+            boolean over = (Boolean)connect.getProperty("GAME_OVER");
+            if(over)
+                setVisible(false);
+        }
+    }
 
     public Window(MVController controller){
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        this.controller = controller;
+
+        this.controller.getConnector().connectTo("WINDOW" , new GameOver());
+
         IconSet.loadIcons();
 
         eventDispatcher = new EventDispatcher(controller);
+
         screens = new HashMap<>();
         this.connector = controller.getConnector();
         screens.put("MAIN_MENU" , new MainMenu(this));
         screens.put("GAME_SCENE" , new GameScene(this));
+
 
         rootPanel = new JPanel();
         cardLayout = new CardLayout();
@@ -35,11 +52,13 @@ public class Window extends JFrame {
         rootPanel.add(screens.get("MAIN_MENU") , "MAIN_MENU");
         rootPanel.add(screens.get("GAME_SCENE") , "GAME_SCENE");
 
+
         currentScreenName = "MAIN_MENU";
         cardLayout.show(rootPanel , "MAIN_MENU");
         add(rootPanel);
         updateSize();
     }
+
 
     public ClientPanel getPanelByName(String name){
         return screens.get(name);
@@ -55,9 +74,18 @@ public class Window extends JFrame {
     public EventDispatcher getEventDispatcher(){
         return eventDispatcher;
     }
+    public MVController getController(){
+        return controller;
+    }
 
     public void updateSize(){
-        setSize(SizeConfig.WINDOW_X , SizeConfig.WINDOW_Y);
+
+        if ("MAIN_MENU".equals(currentScreenName)) {
+            setSize(SizeConfig.MENU_X, SizeConfig.MENU_Y);
+            //System.out.println("OK");
+        } else {
+            setSize(SizeConfig.WINDOW_X, SizeConfig.WINDOW_Y);
+        }
         getContentPane().setSize(SizeConfig.WINDOW_X , SizeConfig.WINDOW_Y);
         setResizable(false);
         screens.get(currentScreenName).updateSize();

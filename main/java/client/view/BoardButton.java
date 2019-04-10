@@ -25,9 +25,8 @@ public class BoardButton extends JButton implements Consumer {
             setIcon(null);
             return;
         }
-        if(connect.getProperty("PIECE_COLOR")==null)return;
         String pType = (String)connect.getProperty("PIECE");
         String clr = (String)connect.getProperty("PIECE_COLOR");
-        setIcon(IconSet.getIcon(pType , clr));
+        setIcon(IconSet.getChessIcon(pType , clr));
     }
 }

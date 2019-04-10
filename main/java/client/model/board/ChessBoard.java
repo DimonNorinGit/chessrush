@@ -59,7 +59,7 @@ public class ChessBoard {
 
 
 
-    public void show(){
+    /*public void show(){
         System.out.print("  ");
         for(int i = 0; i < X_SIZE; ++i) System.out.print(i + " ");
         System.out.print("\n");
@@ -94,7 +94,7 @@ public class ChessBoard {
             }
             System.out.print("\n");
         }
-    }
+    }*/
 
     private void init(Connector connector){
         for(int i = 0; i < X_SIZE; ++i){

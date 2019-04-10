@@ -1,5 +1,6 @@
 package client.model.piece;
 
+import client.Point;
 import client.model.board.BoardSide;
 import client.model.board.ChessBoard;
 
@@ -43,6 +44,10 @@ abstract public class ChessSet {
     }
 
     abstract protected   void definePiecesCounts();
+
+    abstract  public void removePiece(String pieceName , Piece piece);
+
+    abstract public Piece createNewPiece(String pieceName);
 
     //should clear
     abstract protected void setPieces();

@@ -18,8 +18,6 @@ public class Board extends ClientPanel {
     public static final int xSize = 8;
     public static final int ySize = 8;
     private Window root;
-
-    //private JButton[][] squares = new BoardButton[xSize][ySize];
     private List<BoardButton> squares = new LinkedList<>();
 
     public Board(Window root){
@@ -47,16 +45,20 @@ public class Board extends ClientPanel {
         for (int i = 0; i < ySize; ++i){
             for(int j = 0; j < xSize; ++j){
                 squares.add(new BoardButton(new Point(j , i)));
-                Color clr = null;
+                Color clr;
                 if((i + j) % 2 == 0){
                     clr = ColorsSet.SQUARE_WHITE;
                 }else{
                     clr = ColorsSet.SQUARE_BLACK;
                 }
                 JButton b = squares.get(i * xSize + j);
-                b.setSize(SizeConfig.SQUARE_X , SizeConfig.SQUARE_Y);
+                Dimension d = new Dimension(SizeConfig.SQUARE_X , SizeConfig.SQUARE_Y);
+
+                //b.setSize(d);
+                b.setPreferredSize(d);
+                //b.setSize(d);
+
                 b.setBackground(clr);
-                //squares[i][j].setIcon(new ImageIcon(IconsPaths.KNIGHT));
                 b.addActionListener(handler);
                 root.getConnector().connectTo("SQUARE" + i + j , (Consumer)b);
                 add(b);
@@ -67,20 +69,12 @@ public class Board extends ClientPanel {
     private class FlipConsumer implements Consumer{
         @Override
         public void update(Connect connect) {
-            if(connect.getProperty("IS_FLIPPED") == null){
-                return;
-            }
-            boolean is_flipped = (Boolean) connect.getProperty("IS_FLIPPED");
+
+            if((Boolean) connect.getProperty("IS_FLIPPED"))flip();
+
+            /*boolean is_flipped = (Boolean) connect.getProperty("IS_FLIPPED");
             if(is_flipped){
                 flip();
-            }
-
-            /*
-            String side = (String)connect.getProperty("CURRENT_SIDE");
-            if(side.compareTo("NORMAL") == 0){
-
-            }else if(side.compareTo("FLIPPED") == 0){
-
             }*/
         }
 
@@ -104,12 +98,8 @@ public class Board extends ClientPanel {
             EventDispatcher dispatcher =  root.getEventDispatcher();
             for(BoardButton button : squares ) {
                 if (button == source) {
-
                     Point pos = button.getPosition();
                     dispatcher.processClick(pos.getX(), pos.getY());
-
-                    //System.out.println(i + " " + j);
-                    //отдать обработчику нажатий
                 }
             }
         }

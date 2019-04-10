@@ -15,4 +15,5 @@ public class IconsPaths {
     public static final String BLACK_QUEEN  =  res + "blackParty\\Queen.png";
     public static final String BLACK_ROOK  =   res + "blackParty\\Rook.png";
     public static final String BLACK_KNIGHT  = res + "blackParty\\Knight.png";
+    public static final String MENU_BACKGROUND = res + "menuBackground.png";
 }
