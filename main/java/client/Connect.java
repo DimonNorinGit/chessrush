@@ -25,6 +25,10 @@ public class Connect {
         consumers.add(consumer);
     }
 
+    public Set<Consumer> getConsumers() {
+        return consumers;
+    }
+
     public void updateConsumers(){
         for(Consumer c : consumers){
             c.update(this);

@@ -11,6 +11,10 @@ public class Connector {
     private Map<String , Connect> connections = new HashMap<>();
 
     public void registerConnection(String name , Connect connect){
+        if(connections.containsKey(name)){
+            for (Consumer c : connections.get(name).getConsumers())
+                connect.addConsumer(c);
+        }
         connections.put(name , connect);
     }
 

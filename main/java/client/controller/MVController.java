@@ -25,7 +25,6 @@ public class MVController {
 
 
     private Connector connector;
-    private EventDispatcher dispatcher;
     private SessionController sessionController;
     private Window window;
     private Piece transformingPiece = null;
@@ -43,7 +42,7 @@ public class MVController {
 
         Connect gameOverConnect = new Connect();
         gameOverConnect.setProperty("GAME_OVER" , false);
-        gameOverConnect.setProperty("WINNER" , null);
+        gameOverConnect.setProperty("WINNER_COLOR" , null);
         connector.registerConnection("WINDOW" , gameOverConnect);
 
 
@@ -61,7 +60,6 @@ public class MVController {
 
 
         window = new Window(this);
-        dispatcher = window.getEventDispatcher();
     }
 
     public Connector getConnector(){
@@ -111,6 +109,7 @@ public class MVController {
 
 
     public void addNewClick(int x , int y){
+        //System.out.println("DONE");
         //обработка нажатия
         connector.getConnect("FLIP_BOARD").setProperty("IS_FLIPPED" , false);
         connector.getConnect("ELECTOR").setProperty("IS_VISIBLE" , false);
@@ -119,6 +118,7 @@ public class MVController {
         LogicManager logicManager = session.getLogicManager();
 
         if(!isFirstClick && !logicManager.isCorrectStartSquare(session , new Point(x , y))){
+            System.out.println(x  + "  " + y);
             return;
         }
         if(!isFirstClick) {
@@ -145,15 +145,16 @@ public class MVController {
             System.out.println(state);
             if(state == StepCorrectState.CHECK_MATE){
                 connector.getConnect("WINDOW").setProperty("GAME_OVER" , true);
+                connector.getConnect("WINDOW").setProperty("WINNER_COLOR" , ChessColor.WHITE.toString());
             }else if(state == StepCorrectState.TRANSFORMATION){
                 connector.getConnect("ELECTOR").setProperty("IS_VISIBLE" , true);
                 transformingPiece = session.getChessBoard().
                         getBoardSquare(endPoint.getX() , endPoint.getY()).getPiece();
             }
             if(logicManager.getCurrentChessColor() == ChessColor.WHITE){
-                connector.getConnect("GAME_SCENE").setProperty("CURRENT_COLOR" , "WHITE");
+                connector.getConnect("GAME_SCENE").setProperty("CURRENT_COLOR" , ChessColor.WHITE.toString());
             }else{
-                connector.getConnect("GAME_SCENE").setProperty("CURRENT_COLOR" , "BLACk");
+                connector.getConnect("GAME_SCENE").setProperty("CURRENT_COLOR" , ChessColor.BLACK.toString());
             }
             ++order;
             connector.getConnect("FLIP_BOARD").setProperty("IS_FLIPPED" , true);
@@ -169,6 +170,19 @@ public class MVController {
                 currentClickY = y;
             }
         }
+    }
+    public void restart(){
+        PlayerInfo local = new PlayerInfo("Bob" , ChessColor.WHITE , BoardSide.BOTTOM);
+        PlayerInfo distant = new PlayerInfo("Cat" , ChessColor.BLACK , BoardSide.TOP);
+        sessionController.reinitialize(local , distant , connector);
+        connector.getConnect("WINDOW").setProperty("GAME_OVER" , false);
+        isFirstClick = false;
+        order = 0;
+        if("WHITE".equals(connector.getConnect("WINDOW").getProperty("WINNER_COLOR"))){
+            connector.getConnect("FLIP_BOARD").setProperty("IS_FLIPPED" , true);
+        }
+
+        connector.updateConnections();
     }
 
     public void run(){

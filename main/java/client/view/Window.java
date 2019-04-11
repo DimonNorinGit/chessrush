@@ -20,12 +20,13 @@ public class Window extends JFrame {
     private MVController controller;
 
     private class GameOver implements Consumer{
-
         @Override
         public void update(Connect connect) {
             boolean over = (Boolean)connect.getProperty("GAME_OVER");
-            if(over)
-                setVisible(false);
+            if(over) {
+                changePanel("WINNER_PANEL");
+                //setVisible(false);
+            }
         }
     }
 
@@ -43,6 +44,7 @@ public class Window extends JFrame {
         this.connector = controller.getConnector();
         screens.put("MAIN_MENU" , new MainMenu(this));
         screens.put("GAME_SCENE" , new GameScene(this));
+        screens.put("WINNER_PANEL" , new WinnerPanel(this));
 
 
         rootPanel = new JPanel();
@@ -51,7 +53,7 @@ public class Window extends JFrame {
 
         rootPanel.add(screens.get("MAIN_MENU") , "MAIN_MENU");
         rootPanel.add(screens.get("GAME_SCENE") , "GAME_SCENE");
-
+        rootPanel.add(screens.get("WINNER_PANEL") , "WINNER_PANEL");
 
         currentScreenName = "MAIN_MENU";
         cardLayout.show(rootPanel , "MAIN_MENU");
@@ -65,6 +67,9 @@ public class Window extends JFrame {
     }
 
     public void changePanel(String name){
+        if("GAME_SCENE".equals(name)){
+            controller.restart();
+        }
         currentScreenName = name;
         updateSize();
         cardLayout.show(rootPanel , name);
